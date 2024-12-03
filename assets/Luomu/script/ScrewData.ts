@@ -3,10 +3,10 @@ import { ScrewColor } from "./ScrewColor";
 /** 螺丝圈数据 */
 export class ScrewData {
     color: ScrewColor; // 螺丝圈颜色
-    isHidden: boolean; // 是否隐藏
+    isShow: boolean; // 是否显示
 
-    constructor(color: ScrewColor, isHidden: boolean = false) {
+    constructor(color: ScrewColor, isShow: boolean = false) {
         this.color = color;
-        this.isHidden = isHidden;
+        this.isShow = isShow;
     }
 }

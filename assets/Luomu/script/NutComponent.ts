@@ -25,15 +25,19 @@ export class NutComponent extends Component {
         return rings.length > 0 ? rings[rings.length - 1] : null;
     }
 
-    // 揭示相邻颜色相同的螺丝圈
-    revealAdjacentScrews(color: ScrewColor) {
-        const rings = this.ringsNode.children;
-        for (const ring of rings) {
-            const ringComponent = ring.getComponent(Ring);
-            if (ringComponent && ringComponent.color === color) {
-                console.log(`揭示的颜色:${color}`)
-                // 揭示颜色相同的螺丝圈
-                ring.active = true;
+    updateScrewVisibility(): void {
+        const screws = this.data.screws;
+        for (let i = 0; i < screws.length; i++) {
+            const screw = screws[i];
+            const screwNode = this.ringsNode.children[i];
+            if (screwNode) {
+                screwNode.active = screw.isShow; // 显示对应的螺丝圈节点
+            }
+
+            // 更新 ringsUnknowNode 的隐藏状态
+            const ringsUnknowNode = this.ringsUnknowNode.children[i];
+            if (ringsUnknowNode) {
+                ringsUnknowNode.active = !screw.isShow;
             }
         }
     }

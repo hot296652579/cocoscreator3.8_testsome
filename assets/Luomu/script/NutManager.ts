@@ -13,8 +13,6 @@ export class NutManager extends Component {
 
     @property([Node])
     nutNodes: Node[] = []; // 螺母节点数组
-
-    private suspendedRing: Node | null = null;
     private currentRing: Node | null = null; // 当前悬浮的螺丝圈
     private currentNut: Node | null = null; // 当前选择的螺母
 
@@ -31,8 +29,8 @@ export class NutManager extends Component {
             const rings = nutComponent.ringsNode.children;
             for (const ring of rings) {
                 const ringComponent = ring.getComponent(Ring)!;
-                const isHidden = ring.active;
-                const screwData = new ScrewData(ringComponent.color, isHidden);
+                const isShow = ring.active;
+                const screwData = new ScrewData(ringComponent.color, isShow);
                 nutComponent.data.addScrew(screwData);
             }
         }
@@ -109,10 +107,18 @@ export class NutManager extends Component {
      * @param isReturning 是否归位操作
     */
     moveRingToNut(ringNode: Node, targetNutComponent: NutComponent, isReturning: boolean = false) {
+        if (!ringNode) return;
+
         if (!isReturning && this.currentNut) {
             const currentNutComponent = this.currentNut.getComponent(NutComponent)!;
+
             // 移除当前螺母顶部的螺丝圈
-            currentNutComponent.data.removeTopScrew();
+            const removedScrew = currentNutComponent.data.removeTopScrew();
+
+            if (removedScrew) {
+                // 揭示离开螺母的螺丝圈
+                this.revealBelowScrews(currentNutComponent);
+            }
 
             // 将新的螺丝圈数据添加到目标螺母的数据结构中
             const ringComponent = ringNode.getComponent(Ring)!;
@@ -123,6 +129,54 @@ export class NutManager extends Component {
         targetNutComponent.addRingNode(ringNode);
     }
 
+    /**
+     * 处理移开顶部螺丝圈后的揭示逻辑
+     * @param nutComponent 当前螺母组件
+     * @param removedScrew 刚移除的螺丝圈数据
+     */
+    revealBelowScrews(nut: NutComponent): void {
+        const screws = nut.data.screws;
+
+        if (screws.length === 0) {
+            console.log('No screws to reveal.');
+            return;
+        }
+
+        // 从顶部向下找到第一个可见的螺丝圈
+        let revealColor: ScrewColor | null = null;
+        let foundVisibleScrew = false;
+
+        // 从顶部向下查找第一个未隐藏的螺丝圈
+        for (let i = screws.length - 1; i >= 0; i--) {
+            const screw = screws[i];
+            if (!screw.isShow) {  // 找到第一个可见的螺丝圈
+                revealColor = screw.color;
+                console.log(`揭示的颜色: ${revealColor}`);
+                foundVisibleScrew = true;
+                break;
+            }
+        }
+
+        if (!foundVisibleScrew || !revealColor) {
+            console.log('No visible screws to use for reveal.');
+            return;
+        }
+
+        let revealCount = 0;
+        for (let i = screws.length - 1; i >= 0; i--) {
+            let screw = screws[i];
+            if (screw.color == revealColor) {  // 找到第一个可见的螺丝圈
+                screw.isShow = true; // 设置为显示，表示被揭示
+                revealCount++;
+            } else if (screw.color !== revealColor) {
+                break;
+            }
+        }
+
+        // console.log(`Revealed ${revealCount} screws of color ${revealColor}.`);
+        // 更新显示效果
+        nut.updateScrewVisibility();
+    }
 
     resetCurrentSelection() {
         this.currentRing = null;
