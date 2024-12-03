@@ -14,10 +14,24 @@ export class NutComponent extends Component {
     @property(Node)
     suspensionNode: Node = null!; // 螺母中的 Suspension 节点
 
+    @property(Node)
+    capNode: Node = null!; // 螺母帽
+
+    @property(Boolean)
+    isGroup: boolean = false;    //是否是归类形
+
+    @property(Number)
+    maxScrews: number = 6;      // 最大螺丝数量
+
     public data: NutData = new NutData();
 
     @property(Node)
     ringsUnknowNode: Node = null!; // 螺母中的 RingsUnknow 节点，用于存放未知螺丝圈
+
+    protected start(): void {
+        this.data.maxScrews = this.maxScrews;
+        this.data.isGroup = this.isGroup;
+    }
 
     // 获取顶部螺丝圈节点
     getTopRingNode(): Node | null {
@@ -55,5 +69,10 @@ export class NutComponent extends Component {
     // 获取悬浮位置
     getSuspensionPosition() {
         return this.suspensionNode.worldPosition;
+    }
+
+    //显示螺母帽
+    displayNutCap(show: boolean) {
+        this.capNode.active = show;
     }
 }

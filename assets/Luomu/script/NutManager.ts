@@ -54,7 +54,6 @@ export class NutManager extends Component {
 
     onNutClicked(nutNode: Node) {
         const nutComponent = nutNode.getComponent(NutComponent)!;
-
         if (this.currentRing) {
             // 已有悬浮螺丝圈
             if (this.currentNut === nutNode) {
@@ -70,6 +69,7 @@ export class NutManager extends Component {
                     this.moveRingToSuspension(this.currentRing, nutComponent, () => {
                         this.moveRingToNut(this.currentRing!, nutComponent, false);
                         this.resetCurrentSelection();
+                        this.checkAndDisplayNutCap(nutComponent);
                     });
                 }
             }
@@ -132,21 +132,18 @@ export class NutManager extends Component {
     /**
      * 处理移开顶部螺丝圈后的揭示逻辑
      * @param nutComponent 当前螺母组件
-     * @param removedScrew 刚移除的螺丝圈数据
      */
-    revealBelowScrews(nut: NutComponent): void {
-        const screws = nut.data.screws;
+    revealBelowScrews(nutComponent: NutComponent): void {
+        const screws = nutComponent.data.screws;
 
         if (screws.length === 0) {
-            console.log('No screws to reveal.');
+            console.log('没有螺丝需要揭示.');
             return;
         }
 
-        // 从顶部向下找到第一个可见的螺丝圈
         let revealColor: ScrewColor | null = null;
         let foundVisibleScrew = false;
 
-        // 从顶部向下查找第一个未隐藏的螺丝圈
         for (let i = screws.length - 1; i >= 0; i--) {
             const screw = screws[i];
             if (!screw.isShow) {  // 找到第一个可见的螺丝圈
@@ -157,24 +154,21 @@ export class NutManager extends Component {
         }
 
         if (!foundVisibleScrew || !revealColor) {
-            console.log('No visible screws to use for reveal.');
+            console.log('没有找到显示的螺丝圈做揭示.');
             return;
         }
 
-        let revealCount = 0;
-        for (let i = screws.length - 1; i >= 0; i--) {
-            let screw = screws[i];
-            if (screw.color == revealColor) {  // 找到第一个可见的螺丝圈
-                screw.isShow = true; // 设置为显示，表示被揭示
-                revealCount++;
-            } else if (screw.color !== revealColor) {
-                break;
-            }
-        }
-
-        // console.log(`Revealed ${revealCount} screws of color ${revealColor}.`);
+        nutComponent.data.revealBelowScrews(revealColor);
         // 更新显示效果
-        nut.updateScrewVisibility();
+        nutComponent.updateScrewVisibility();
+    }
+
+    /** 检测归类的螺母是否完成归类*/
+    checkAndDisplayNutCap(nutComponent: NutComponent) {
+        const checkIfGrouped = nutComponent.data.checkIfGrouped();
+        if (checkIfGrouped) {
+            nutComponent.displayNutCap(true);
+        }
     }
 
     resetCurrentSelection() {
