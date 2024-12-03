@@ -151,7 +151,6 @@ export class NutManager extends Component {
             const screw = screws[i];
             if (!screw.isShow) {  // 找到第一个可见的螺丝圈
                 revealColor = screw.color;
-                console.log(`揭示的颜色: ${revealColor}`);
                 foundVisibleScrew = true;
                 break;
             }
