@@ -1,0 +1,79 @@
+{
+  "ver": "2.3.12",
+  "importer": "fbx",
+  "imported": true,
+  "uuid": "036c042f-df48-464a-bb66-cd65552430cb",
+  "files": [],
+  "subMetas": {
+    "4355c": {
+      "importer": "gltf-mesh",
+      "uuid": "036c042f-df48-464a-bb66-cd65552430cb@4355c",
+      "displayName": "",
+      "id": "4355c",
+      "name": "Nut.mesh",
+      "userData": {
+        "gltfIndex": 0,
+        "triangleCount": 6864
+      },
+      "ver": "1.1.1",
+      "imported": true,
+      "files": [
+        ".bin",
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "c6f21": {
+      "importer": "gltf-scene",
+      "uuid": "036c042f-df48-464a-bb66-cd65552430cb@c6f21",
+      "displayName": "",
+      "id": "c6f21",
+      "name": "Nuts.prefab",
+      "userData": {
+        "gltfIndex": 0
+      },
+      "ver": "1.0.14",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    }
+  },
+  "userData": {
+    "imageMetas": [],
+    "fbx": {
+      "smartMaterialEnabled": true
+    },
+    "lods": {
+      "enable": false,
+      "hasBuiltinLOD": false,
+      "options": [
+        {
+          "screenRatio": 0.25,
+          "faceCount": 1
+        },
+        {
+          "screenRatio": 0.125,
+          "faceCount": 0.25
+        },
+        {
+          "screenRatio": 0.01,
+          "faceCount": 0.1
+        }
+      ]
+    },
+    "assetFinder": {
+      "meshes": [
+        "036c042f-df48-464a-bb66-cd65552430cb@4355c"
+      ],
+      "skeletons": [],
+      "textures": [],
+      "materials": [],
+      "scenes": [
+        "036c042f-df48-464a-bb66-cd65552430cb@c6f21"
+      ]
+    },
+    "redirect": "036c042f-df48-464a-bb66-cd65552430cb@c6f21"
+  }
+}

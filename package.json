@@ -1,0 +1,12 @@
+{
+  "name": "TestSome",
+  "uuid": "7bd5f99d-7bd1-444f-93d6-fb56eab8757c",
+  "version": "3.0.0",
+  "_sourceId": "c30b28da-749e-479b-bcb6-cecd8d7be9e3",
+  "creator": {
+    "version": "3.8.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.8.5"
+  }
+}
