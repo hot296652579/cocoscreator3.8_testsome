@@ -1,7 +1,9 @@
-import { _decorator, Component, Node, tween, v3, Vec3 } from 'cc';
+import { _decorator, CCBoolean, CCFloat, Component, Node, tween, v3, Vec3 } from 'cc';
 import { NutData } from './NutData';
 import { Ring } from './Ring';
 import { ScrewColor } from './ScrewColor';
+import { ScrewData } from './ScrewData';
+import { NutManager, NutOperationRecord } from './NutManager';
 
 const { ccclass, property } = _decorator;
 
@@ -17,11 +19,13 @@ export class NutComponent extends Component {
     @property(Node)
     capNode: Node = null!; // 螺母帽
 
-    @property(Boolean)
+    @property(CCBoolean)
     isGroup: boolean = false;    //是否是归类形
 
-    @property(Number)
+    @property(CCFloat)
     maxScrews: number = 6;      // 最大螺丝数量
+
+    isDone: boolean = false; // 是否完成
 
     public data: NutData = new NutData();
 
@@ -31,6 +35,7 @@ export class NutComponent extends Component {
     protected start(): void {
         this.data.maxScrews = this.maxScrews;
         this.data.isGroup = this.isGroup;
+        this.data.isDone = this.isDone;
     }
 
     // 获取顶部螺丝圈节点
@@ -57,12 +62,20 @@ export class NutComponent extends Component {
     }
 
     // 添加螺丝圈到螺母动画
-    addRingNode(ringNode: Node) {
+    addRingNode(ringNode: Node, isReturning: boolean = false) {
+        const startPosition = ringNode.position.clone(); // 记录起始位置
+        const diff = isReturning ? 1 : 0;
+        const newY = (this.ringsNode.children.length - diff) * 1.5; // Y 坐标间隔 1.5
+        const endPosition = new Vec3(0, newY, 0);
+
+        // 将螺丝圈添加到节点并播放动画
         ringNode.setParent(this.ringsNode);
-        const newY = (this.ringsNode.children.length - 1) * 1.5; //Y坐标间隔1.5
-        ringNode.setPosition(new Vec3(0, newY, 0));
+        ringNode.setPosition(endPosition);
         tween(ringNode)
             .to(0.3, { eulerAngles: new Vec3(0, 180, 0) })
+            .call(() => {
+                //DOTO 恢复可操作布尔值
+            })
             .start();
     }
 
@@ -74,5 +87,27 @@ export class NutComponent extends Component {
     //显示螺母帽
     displayNutCap(show: boolean) {
         this.capNode.active = show;
+    }
+
+    /**
+     * 撤销操作：恢复节点位置和数据
+     */
+    undoRingNodeOperation(lastOperation: NutOperationRecord): void {
+        const { opNode, fromNut, toNut, fromPosition, toPosition, fromScreews, toScreews } = lastOperation;
+        // console.log('恢复的from screws数据:', fromScreews);
+        tween(opNode)
+            .to(0.3, { position: this.suspensionNode.position })
+            .call(() => {
+                const rings = fromNut.getComponent(NutComponent)!.ringsNode;
+                opNode.parent = rings;
+            })
+            .to(0.3, { position: fromPosition })
+            .call(() => {
+                toNut.getComponent(NutComponent)!.data!.screws = toScreews;
+                fromNut.getComponent(NutComponent)!.data!.screws = fromScreews;
+                //DOTO 恢复可操作布尔值
+            })
+            .start();
+
     }
 }

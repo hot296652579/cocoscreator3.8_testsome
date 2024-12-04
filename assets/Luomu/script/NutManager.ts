@@ -15,6 +15,8 @@ export class NutManager extends Component {
     nutNodes: Node[] = []; // 螺母节点数组
     private currentRing: Node | null = null; // 当前悬浮的螺丝圈
     private currentNut: Node | null = null; // 当前选择的螺母
+    private operationStack: NutOperationRecord[] = []; // 操作栈
+    private inOperation: boolean = false; // 是否在操作中
 
     start() {
         this.initNuts(); // 初始化数据
@@ -53,7 +55,16 @@ export class NutManager extends Component {
     }
 
     onNutClicked(nutNode: Node) {
+        if (this.inOperation) return;
+
         const nutComponent = nutNode.getComponent(NutComponent)!;
+
+        // 判断是否是归类类型且已经完成
+        if (nutComponent.data.isGroup && nutComponent.data.isDone) {
+            console.log('该螺母已完成归类，无法操作');
+            return;
+        }
+
         if (this.currentRing) {
             // 已有悬浮螺丝圈
             if (this.currentNut === nutNode) {
@@ -111,10 +122,9 @@ export class NutManager extends Component {
 
         if (!isReturning && this.currentNut) {
             const currentNutComponent = this.currentNut.getComponent(NutComponent)!;
-
+            this.saveOperation(ringNode, currentNutComponent, targetNutComponent);
             // 移除当前螺母顶部的螺丝圈
             const removedScrew = currentNutComponent.data.removeTopScrew();
-
             if (removedScrew) {
                 // 揭示离开螺母的螺丝圈
                 this.revealBelowScrews(currentNutComponent);
@@ -126,7 +136,8 @@ export class NutManager extends Component {
             targetNutComponent.data.addScrew(screwData);
         }
 
-        targetNutComponent.addRingNode(ringNode);
+        this.inOperation = true;
+        targetNutComponent.addRingNode(ringNode, isReturning);
     }
 
     /**
@@ -167,7 +178,7 @@ export class NutManager extends Component {
     checkAndDisplayNutCap(nutComponent: NutComponent) {
         const checkIfGrouped = nutComponent.data.checkIfGrouped();
         if (checkIfGrouped) {
-            nutComponent.displayNutCap(true);
+            nutComponent.displayNutCap(checkIfGrouped);
         }
     }
 
@@ -175,4 +186,65 @@ export class NutManager extends Component {
         this.currentRing = null;
         this.currentNut = null;
     }
+
+    /**
+     * 保存操作记录
+     */
+    saveOperation(ringNode: Node, curNutComponent: NutComponent, targetNutComponent: NutComponent): void {
+        const fromNutNode = curNutComponent.node;
+        const toNutNode = targetNutComponent.node;
+
+        const newStartY = (curNutComponent.ringsNode.children.length - 1) * 1.5;
+        const startPosition = new Vec3(0, newStartY, 0);
+
+        const newEndY = (targetNutComponent.ringsNode.children.length) * 1.5;
+        const endPosition = new Vec3(0, newEndY, 0);
+
+        //深度拷贝
+        const fromScreews = curNutComponent.data.screws.map(screw => ({ ...screw }));
+        const toScreews = targetNutComponent.data.screws.map(screw => ({ ...screw }));
+
+        const operation: NutOperationRecord = {
+            fromNut: fromNutNode,
+            toNut: toNutNode,
+            opNode: ringNode,
+            fromPosition: startPosition,
+            toPosition: endPosition,
+            fromScreews: fromScreews,
+            toScreews: toScreews,
+        }
+
+        // console.log('保存的from screws数据:', operation.fromScreews);
+        this.operationStack.push(operation);
+    }
+
+    /**
+     * 撤销最近的操作
+     */
+    undoLastOperation(): void {
+        const lastOperation = this.operationStack.pop();
+        if (!lastOperation) {
+            console.warn('没有可撤销的操作!');
+            return;
+        }
+
+        this.inOperation = true;
+        const { toNut } = lastOperation;
+        toNut.getComponent(NutComponent)?.undoRingNodeOperation(lastOperation);
+    }
+}
+
+/**
+ * 表示螺母操作记录的接口
+ */
+export interface NutOperationRecord {
+    fromNut: Node;
+    toNut: Node;
+    opNode: Node;
+
+    fromScreews: ScrewData[];
+    toScreews: ScrewData[];
+
+    fromPosition: Vec3;
+    toPosition: Vec3;
 }

@@ -1,3 +1,4 @@
+import { Vec3, Node } from "cc";
 import { ScrewColor } from "./ScrewColor";
 import { ScrewData } from "./ScrewData";
 
@@ -5,7 +6,8 @@ import { ScrewData } from "./ScrewData";
 export class NutData {
     public screws: ScrewData[] = []; // 当前螺母的螺丝圈数据
     public maxScrews: number = 6; // 螺母最大容量 默认6个
-    public isGroup: boolean = false; // 是否已经归类完成
+    public isGroup: boolean = false; // 是否是归类类型
+    public isDone: boolean = false; // 是否完成
 
     constructor() { }
 
@@ -60,10 +62,10 @@ export class NutData {
 
     /** 螺母是否完成*/
     checkIfGrouped(): boolean {
-        // 螺母已满且颜色一致
         if (this.isFull()) {
             const firstColor = this.screws[0].color;
-            return this.screws.every(screw => screw.color === firstColor);
+            this.isDone = this.screws.every(screw => screw.color === firstColor);
+            return this.isDone;
         }
         return false;
     }

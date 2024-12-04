@@ -1171,11 +1171,11 @@
     "_center": {
       "__type__": "cc.Vec3",
       "x": 0,
-      "y": 5.5,
+      "y": 5,
       "z": 0
     },
     "_radius": 2,
-    "_height": 12,
+    "_height": 10,
     "_direction": 1,
     "_id": ""
   },
